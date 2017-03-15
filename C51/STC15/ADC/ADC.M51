@@ -1,0 +1,245 @@
+BL51 BANKED LINKER/LOCATER V6.22                                                        10/30/2016  20:43:39  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22, INVOKED BY:
+F:\KEIL5\C51\BIN\BL51.EXE ADC.obj TO ADC RAMSIZE (256)
+
+
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  ADC.obj (ADC)
+  F:\KEIL5\C51\LIB\C51S.LIB (?C_STARTUP)
+  F:\KEIL5\C51\LIB\C51S.LIB (?C?CLDPTR)
+  F:\KEIL5\C51\LIB\C51S.LIB (?C?ULCMP)
+  F:\KEIL5\C51\LIB\C51S.LIB (?C_INIT)
+
+
+LINK MAP OF MODULE:  ADC (ADC)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            DATA    0008H     0004H     UNIT         _DATA_GROUP_
+            DATA    000CH     0003H     UNIT         ?DT?_SENDSTR?ADC
+                    000FH     0011H                  *** GAP ***
+            BIT     0020H.0   0000H.2   UNIT         ?BI?ADC
+                    0020H.2   0010H.6                *** GAP ***
+            DATA    0031H     0001H     ABSOLUTE     
+            IDATA   0032H     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+            CODE    0003H     0019H     UNIT         ?PR?UARTINIT?ADC
+            CODE    001CH     0005H     UNIT         ?C_INITSEG
+                    0021H     0002H                  *** GAP ***
+            CODE    0023H     0003H     ABSOLUTE     
+            CODE    0026H     008CH     UNIT         ?C_C51STARTUP
+            CODE    00B2H     005DH     UNIT         ?PR?MAIN?ADC
+            CODE    010FH     002AH     UNIT         ?C?LIB_CODE
+            CODE    0139H     0025H     UNIT         ?PR?_SENDSTR?ADC
+            CODE    015EH     0014H     UNIT         ?PR?_DELAYX1MS?ADC
+            CODE    0172H     0010H     UNIT         ?PR?_DELAY1US?ADC
+            CODE    0182H     000DH     UNIT         ?PR?UART?ADC
+            CODE    018FH     000CH     UNIT         ?PR?DELAY1MS?ADC
+            CODE    019BH     0008H     UNIT         ?PR?_SENDDATA?ADC
+
+
+
+OVERLAY MAP OF MODULE:   ADC (ADC)
+
+
+SEGMENT                          DATA_GROUP 
+  +--> CALLED SEGMENT          START    LENGTH
+----------------------------------------------
+?C_C51STARTUP                  -----    -----
+  +--> ?PR?MAIN?ADC
+  +--> ?C_INITSEG
+BL51 BANKED LINKER/LOCATER V6.22                                                      10/30/2016  20:43:39  PAGE 2
+
+
+
+?PR?MAIN?ADC                   0008H    0004H
+  +--> ?PR?UARTINIT?ADC
+  +--> ?PR?_SENDDATA?ADC
+
+
+
+SYMBOL TABLE OF MODULE:  ADC (ADC)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        ADC
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:0080H         PUBLIC        P0
+  D:0090H         PUBLIC        P1
+  D:00A0H         PUBLIC        P2
+  D:00B0H         PUBLIC        P3
+  D:00C0H         PUBLIC        P4
+  C:018FH         PUBLIC        Delay1ms
+  D:00C8H         PUBLIC        P5
+  B:00A8H.7       PUBLIC        EA
+  D:00E8H         PUBLIC        P6
+  D:00F8H         PUBLIC        P7
+  D:00A8H         PUBLIC        IE
+  D:00BDH         PUBLIC        ADC_RES
+  B:00A8H.4       PUBLIC        ES
+  D:00B8H         PUBLIC        IP
+  B:0098H.0       PUBLIC        RI
+  B:0098H.1       PUBLIC        TI
+  C:0182H         PUBLIC        Uart
+  D:00D8H         PUBLIC        CCON
+  D:0031H         PUBLIC        adcData
+  C:00B2H         PUBLIC        main
+  C:019BH         PUBLIC        _sendData
+  C:0172H         PUBLIC        _delay1us
+  D:00BCH         PUBLIC        ADC_CONTR
+  D:0099H         PUBLIC        SBUF
+  D:0098H         PUBLIC        SCON
+  C:0003H         PUBLIC        UartInit
+  D:0089H         PUBLIC        TMOD
+  D:0088H         PUBLIC        TCON
+  D:008EH         PUBLIC        AUXR
+  B:0020H.0       PUBLIC        busy
+  B:00A8H.3       PUBLIC        ET1
+  D:008DH         PUBLIC        TH1
+  D:008BH         PUBLIC        TL1
+  B:0088H.6       PUBLIC        TR1
+  D:009DH         PUBLIC        P1ASF
+  B:0020H.1       PUBLIC        adc_ok
+  C:0139H         PUBLIC        _sendStr
+  D:00D0H         PUBLIC        PSW
+  C:015EH         PUBLIC        _delayX1ms
+  -------         PROC          MAIN
+  -------         DO            
+  D:0008H         SYMBOL        i
+  D:0007H         SYMBOL        status
+BL51 BANKED LINKER/LOCATER V6.22                                                      10/30/2016  20:43:39  PAGE 3
+
+
+  -------         ENDDO         
+  C:00B2H         LINE#         226
+  C:00B2H         LINE#         231
+  C:00B4H         LINE#         232
+  C:00B7H         LINE#         250
+  C:00BAH         LINE#         251
+  C:00BDH         LINE#         252
+  C:00F2H         LINE#         253
+  C:00F2H         LINE#         254
+  C:00F5H         LINE#         255
+  C:00F9H         LINE#         256
+  C:00FBH         LINE#         257
+  C:00FEH         LINE#         258
+  C:0103H         LINE#         259
+  C:0105H         LINE#         260
+  C:0108H         LINE#         262
+  C:010DH         LINE#         263
+  -------         ENDPROC       MAIN
+  -------         PROC          DELAY1MS
+  -------         DO            
+  D:0007H         SYMBOL        i
+  D:0006H         SYMBOL        j
+  -------         ENDDO         
+  C:018FH         LINE#         266
+  C:018FH         LINE#         267
+  C:018FH         LINE#         270
+  C:0190H         LINE#         271
+  C:0191H         LINE#         272
+  C:0192H         LINE#         273
+  C:0194H         LINE#         274
+  C:0196H         LINE#         276
+  C:0196H         LINE#         277
+  C:0198H         LINE#         278
+  C:019AH         LINE#         279
+  -------         ENDPROC       DELAY1MS
+  -------         PROC          _DELAYX1MS
+  D:0004H         SYMBOL        t
+  C:015EH         LINE#         281
+  C:0162H         LINE#         282
+  C:016CH         LINE#         283
+  C:016FH         LINE#         284
+  C:0171H         LINE#         285
+  -------         ENDPROC       _DELAYX1MS
+  -------         PROC          _DELAY1US
+  D:0006H         SYMBOL        t
+  C:0172H         LINE#         287
+  C:0172H         LINE#         288
+  C:017CH         LINE#         289
+  C:017DH         LINE#         290
+  C:017EH         LINE#         291
+  C:017FH         LINE#         292
+  C:0181H         LINE#         293
+  -------         ENDPROC       _DELAY1US
+  -------         PROC          UARTINIT
+  C:0003H         LINE#         295
+  C:0003H         LINE#         296
+  C:0003H         LINE#         297
+BL51 BANKED LINKER/LOCATER V6.22                                                      10/30/2016  20:43:39  PAGE 4
+
+
+  C:0006H         LINE#         298
+  C:0009H         LINE#         299
+  C:000CH         LINE#         300
+  C:000FH         LINE#         301
+  C:0012H         LINE#         302
+  C:0015H         LINE#         303
+  C:0017H         LINE#         304
+  C:0019H         LINE#         305
+  C:001BH         LINE#         306
+  -------         ENDPROC       UARTINIT
+  -------         PROC          _SENDDATA
+  D:0007H         SYMBOL        dat
+  C:019BH         LINE#         308
+  C:019BH         LINE#         309
+  C:019EH         LINE#         310
+  C:01A0H         LINE#         311
+  C:01A2H         LINE#         312
+  -------         ENDPROC       _SENDDATA
+  -------         PROC          _SENDSTR
+  D:000CH         SYMBOL        str
+  C:0139H         LINE#         314
+  C:013FH         LINE#         315
+  C:014AH         LINE#         316
+  C:015BH         LINE#         317
+  C:015DH         LINE#         318
+  -------         ENDPROC       _SENDSTR
+  -------         PROC          UART
+  C:0182H         LINE#         320
+  C:0182H         LINE#         321
+  C:0185H         LINE#         322
+  C:0187H         LINE#         323
+  C:0187H         LINE#         325
+  C:018AH         LINE#         326
+  C:018CH         LINE#         327
+  C:018EH         LINE#         328
+  C:018EH         LINE#         329
+  -------         ENDPROC       UART
+  -------         ENDMOD        ADC
+
+  -------         MODULE        ?C?CLDPTR
+  C:010FH         PUBLIC        ?C?CLDPTR
+  -------         ENDMOD        ?C?CLDPTR
+
+  -------         MODULE        ?C?ULCMP
+  C:0128H         PUBLIC        ?C?ULCMP
+  -------         ENDMOD        ?C?ULCMP
+
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_DELAYX1MS?ADC
+
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_DELAY1US?ADC
+
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_SENDSTR?ADC
+
+Program Size: data=17.2 xdata=0 code=417
+BL51 BANKED LINKER/LOCATER V6.22                                                      10/30/2016  20:43:39  PAGE 5
+
+
+LINK/LOCATE RUN COMPLETE.  3 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,236 @@
+String 字符串
+	1.  set 存入数据,同key覆盖,成功return ok
+			example：set key value
+	2.  setnx 存入数据,同key,存在return 0.成功return 1
+			example: setnx key value
+	3.  setex 存入数据设置有效期,成功return ok.
+			example: setex key time value
+	4.  setrange 设置key的value的第n到要设置字符的长度
+			example: setrange key n string
+	5.  mset 设置多个key的value，成功返回设置成功数，只要有一个失败，全部设置不成功
+			example: mset key1 value1 key2 value2
+	6.  msetnx 设置多个key的value，同上
+			example: msetnx key1 value1 key2 value2
+	7.  get 获取key的value
+			example: get key
+	8.  getset 取出旧值并设置新值
+			example: getset key value1
+	9.  getrange 取出key的value值的第n 到 m
+			example: getrange key n m
+	10. mget 取出多个key的value
+			example: mget key1 key2
+	11. incr 对key的value自增1,无该键处自建
+			example: incr key
+	12. incrby 对key的value自增n,无该键处自建
+			example: incrby key n
+	13. decr 对key的value自减1,无该键处自建
+			example: decr key 
+	14. decrby 对key的value自减n,无该键处自建
+			example: decrby key n
+	15. append 对key的value后面添加字符string
+			example: append key string
+	16. strlen 获取key的value的长度
+			example: strlen key
+Hashes 哈希表
+	1.  hset 设置哈希表，并存入key value
+			example: hset tablename key value
+	2.  hsetnx 设置key,存在返回0
+			example: hsetnx tablename key value
+	3.  hmset 设置多个值
+			example: hmset tablename key1 value1 key2 value2
+	4.  hget 取出key的value
+			example: hget tablename key
+	5.  hmage 取出多个的key的value
+			example: hmage tablename key1 key2
+	6.  hincrby 对key的value自增n
+			example: hincrby tablename key1 n
+	7.  hexists 是否存在该key,有 1 ，否 0
+			example: hexists tablename key
+	8.  hlen 获取该表里面的字段数量
+			example: hlen tablename
+	9.  hdel 删除key
+			example: hdel tablename key
+	10. hkeys 返回表里的所有key
+			example: hkeys tablename
+	11. hvals 返回表里的所有value
+			example: hvals tablename
+	12. hgetall 返回表里的所有的key，value
+			example: hget tablename
+
+List 链表结构： 栈－队列
+	1.  lpush 从链表头压入一个元素
+			example: lpush list element
+	2.  lrange 取出链表n到m个元素
+			example: lrange list n m
+	3.  rpush 从链表尾部压入一个元素
+			example: rpush list element
+	4.  linsert 在某个val之前压入一个元素
+			example: linsert list before value element
+	5.  lset 替换某个key的值
+			example: lset list key element
+	6.  lrem 删除n个和value相同的元素
+			example: lrem list n element
+	7.  ltrim 保留链表里面的n到m的元素
+			example: ltrim list n m
+	8.  lpop 从链表头部弹出
+			example: lpop list
+	9.  rpop 从链表尾部弹出
+			example: rpop list
+	10. rpoplpush 弹出一个链表尾部元素添加到另一个链表的头部
+			example: rpoplpush list1 list2
+	11. lindex 返回链表的 index 的元素
+			example: lindex list index
+	12. llen 返回链表的元素个数
+			example: llen list
+	
+Sets 无序集合
+	1.  sadd 向集合里添加元素，不能在集合里面添加同一个元素
+			example: sadd set element
+	2.  srem 删除元素
+			example: srem set element
+	3.  spop 随机弹出元素
+			example: spop set 
+	3.  sdiff 集合差集
+			example: sdiff set1 set2
+	4.  sdiffstore 把set1 set2的差集存在store里
+			example: sdiffstore store set1 set2
+	5.  sinter 集合交集
+			example: sinter set1 set2
+	6.  sinterstore 把set1 set2的交集存在store里
+			example: sinterstore store set1 set2
+	7.  sunion 并集
+			example: sunion set1 set2
+	8.  sunionstore 把set1 set2的并集存在store里
+			example: sunionstore store set1 set2
+	9.  smove 把 set1 里的元素移除到 set2 里
+			example: smove set1 set2 element
+	10. scard 查看集合的元素个数
+			example: scard set
+	11. sismember 该元素是否在该集合里, return  0 or 1
+			example: sismember set element
+	12. srandmember 随机返回元素
+			example: srandmember set
+	13. smembers 查看集合元素
+			example: smembers set
+
+sorted sets 有序集合（zset）
+	1.  zadd 添加元素,相同的元素则更新序列号
+			example: zadd zset sort element
+	2.  zrange 升序查看集合 n 到 m ，加withscores，查看并返回序列号
+			example: zrange zset n m withscores
+	3.  zrevrange 降序查看 n 到 m ，加withscores，查看并返回序列号
+			example: zrevrange zset n m withscores
+	4.  zincrby 对序列号自增 n
+			example: zincrby zset n element
+	5.  zrank 元素序列号升序排序后返回该元素的索引 index
+			example: zrank zset element
+	6.  zrevrank 元素序列号降序排序后返回该元素的索引 index
+			example: zrevrank zset element
+	7.  zrem 删除元素
+			example: zrem zset element
+	8.  zrangebyscore 返回sort 的 n 到 m 的元素,加withscores，查看并返回序列号
+			example: zrangebyscore zset n m withscores
+	9.  zcount 返回sort 的 n 到 m 的元素个数
+			example: zcount zset n m
+    10. zcard 返回集合里元素个数
+    		example: zcard zset
+    11. zremrangebyrank 删除index 的 n 到 m 的元素
+    		example: zremrangebyrank zset n m
+    12. zremrangebyscore 删除sort 的 n 到 m 的元素
+    		example: zremrangebyscore zset n m
+
+
+
+
+Redis 命令
+	键值命令：
+
+		1.  keys 返回符合键名
+				example: keys * //所有keys
+		2.  exists key是否存在,return 0 or 1
+				example: exists key
+		3.  del 删除key,return 0 or 1
+				example: del key
+		4.  expire 对存在的 key 设置有效时间,
+				example: expire key time
+		5.  ttl 查看 key 过期时间, retrun  int or -1
+				example: ttl key
+		6.  select 选择数据第 n 数据库，默认为16个
+				example: select n
+		7.  move 移动 key 到第 n 个数据库
+				example: move key n
+		8.  persist 取消 key 的有效时间
+				example: persist key
+		9.  randomkey 随机返回 key
+				example: randomkey
+		10. rename 重命名 key
+				example: rename key key1
+		11. type 返回 key 的值的类型
+				example: type key
+	
+	服务器命令：
+		1.  启动服务：
+				redis-server configpath
+		2.  停止服务:
+				pkill redis-server
+		3.  ping 测试链接
+				example: ping
+		4.  echo 输出
+				example: echo string
+		5.  select 选择数据第 n 数据库，默认为16个
+				example: select n
+		6.  quit 退出客户端
+				example: quit or exit
+		7.  dbsize 返回当前数据库的 key 个数
+				example: dbsize
+		8.  info 服务器的相关信息
+				example: info
+		9.  config get 返回相关配置的值
+				example: config get dir
+		10. flushdb 清空当前数据库
+				example: flushdb
+		11. flushall 清空所有数据库
+				example: flushall
+redis 安全
+	设置密码：
+		1.  打开 redids-conf ,找到 requirepass foobared,在下面添加
+			requirepass passwd ,passwd 为你要设置的密码。保存退出重启。
+	授权执行命令：
+		1.  重启后可以直接进入客户端，不需要密码，但执行命令的时候就要密码了，	  你要授权命令执行，就要验证密码了，授权使命如下：
+			auth passwd
+			但你这样授权后，每次执行命令都要先授权再执行命令。解决这个问题，可以使用下面的方法。
+		2.  在登入客户端的时候， 加个参数，方法如下：
+			redis-cli -a passwd  
+redis 主从复制 
+	说明：
+		1.  master 对多个 slave
+		2.  多个 slave 可以连接同一个 master 外，还可以相互相连。
+		3.  master 和 slave 同步数据不会阻塞 master，也就是说不会锁表，这跟 	mysql 不同，master 还是可以处理 client 请求
+	主从复制过程：
+		1.  当 slave 发送 sync 同步给 master 时
+		2.  master 会启动一个后台进程，将当前的数据库快照保存到一个文件中，同 	  master 会继续处理客户端的请求，并把新的写入，更新命令缓存起来.
+		3.  后台完成快照后，就将快照文件发给 slave.
+		4.  slave 会将快照文件保留到自己的硬盘空间里.
+	主从配置：
+		slave 配置：
+			在 slave 的 redis-conf 里面找到 slaveof,在下面加入如下的命令：
+				slaveof masteripaddr masterpost
+			如何主机加密了，需要加入主机命令授权，配置如下：
+				masterauth passwd
+redis 事务处理
+	
+
+
+redis-php模块安装
+	1. 进入 http://redis.io/clients 选择 php ，然后在列表里面选择 phpredis .
+	2. 点击进入，下载phpredis,安装包
+	3. 如果无法翻墙，可以直接用git下载.
+	   git clone https://github.com/phpredis/phpredis.git
+	4. 解压进入目录
+	5. 用php的环境给phpredis创建配置环境.命令如下：
+	   /usr/local/php/bin/phpize 
+	   就是你php安装的路径里面的 phpize 环境
+	6. 运行上面的命令后，在目录里面会生成一个configure的配置文件，然后配置，命令如下：
+		./configure --with-php-config=/usr/local/php/bin/php-config
+	7.  然后用 make 命令编译.
+	8.  然后用 make install 命令安装。

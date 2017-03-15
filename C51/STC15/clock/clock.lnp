@@ -1,0 +1,4 @@
+"main.obj",
+"DS18B20.obj" 
+TO "clock" 
+RAMSIZE(256) 
