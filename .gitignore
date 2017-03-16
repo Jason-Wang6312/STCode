@@ -12,3 +12,5 @@ PCB/*csv
 */*jects*
 */*uvgui*
 */*.uvopt*
+STM32/*/DebugConfig
+STM32/*.txt
