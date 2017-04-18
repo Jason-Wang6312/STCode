@@ -1,0 +1,171 @@
+//#include "STC15Wxx.H"
+#include "STC12C5A.H"
+#include "INTRINS.H"
+
+//sbit DS1302_IO = P3^3;
+//sbit DS1302_CE = P5^5;
+//sbit DS1302_CL = P3^2;
+
+sbit DS1302_IO = P3^4;
+sbit DS1302_CE = P3^5;
+sbit DS1302_CL = P3^6;
+//sbit WIFI = P3^2;
+
+void UartInit();
+void Timer0Init();
+void sendData(unsigned char dat);
+void DS1302BurstWrite();
+void DS1302BurstRead(unsigned char leg);
+unsigned char DS1302SingleRead(unsigned char addr);
+
+unsigned char time[7] = {0x00,0x00,0x19,0x15,0x04,0x06,0x17};
+unsigned int sec;
+unsigned char second;
+bit busy;
+
+void main(){
+    unsigned char i,str[5] = "mawei";
+    EA = 1;
+    
+    UartInit();
+    Timer0Init();
+    //DS1302BurstWrite();
+    
+    while(1){
+        for(i=0;i<5;i++){
+            sendData(str[i]);
+        }
+    }
+}
+
+//void UartInit(void)		//4800bps@12.000MHz
+//{
+//	SCON = 0x50;		//8位数据,可变波特率
+//	AUXR |= 0x01;		//串口1选择定时器2为波特率发生器
+//	AUXR |= 0x04;		//定时器2时钟为Fosc,即1T
+//	T2L = 0x8F;		//设定定时初值
+//	T2H = 0xFD;		//设定定时初值
+//	AUXR |= 0x10;		//启动定时器2
+//}
+
+void UartInit(void)		//4800bps@12.000MHz
+{
+    PCON=0x80;
+	SCON = 0x52;
+	AUXR &= 0xFE;
+	TL1 = TH1 = 0xF3;
+	TMOD &= 0x0F;
+	TMOD = 0x20;
+	ET1 = 0;		//禁止定时器1中断
+	TR1 = 1;		//启动定时器1
+    ES = 1;
+}
+
+void Timer0Init(void)		//1毫秒@12.000MHz
+{
+	AUXR |= 0x80;		//定时器时钟1T模式
+	TMOD &= 0xF0;		//设置定时器模式
+	TL0 = 0x20;		//设置定时初值
+	TH0 = 0xD1;		//设置定时初值
+	TF0 = 0;		//清除TF0标志
+	TR0 = 1;		//定时器0开始计时
+    ET0 = 1;
+}
+
+void sendData(unsigned char dat){
+	while(busy);
+	busy = 1;
+    SBUF = dat;
+}
+
+
+void UartIT() interrupt 4 using 1{
+	if(RI){
+		RI = 0;
+	}
+	if(TI){
+        busy = 0;
+		TI = 0;
+	}
+}
+
+void T0() interrupt 1{
+    sec++;
+}
+
+void DS1302Start(){
+    DS1302_CE = 0;
+    DS1302_CL = 0;
+    DS1302_IO = 0;
+    _nop_();
+    _nop_();
+    _nop_();
+    DS1302_CE = 1;
+}
+
+void DS1302End(){
+    DS1302_CE = 0;
+    _nop_();
+    DS1302_CL = 1;
+    _nop_();
+    DS1302_IO = 1;
+}
+
+void DS1302ByteWrite(unsigned char dat){
+    unsigned char i;
+    for(i=0;i<8;i++){
+        dat >>= 1;
+        DS1302_IO = CY;
+        DS1302_CL = 1;
+        DS1302_CL = 0;
+    }
+}
+
+unsigned char DS1302ByteRead(){
+    unsigned char i,dat = 0x00;
+    
+    for(i=0;i<8;i++){             
+        if(DS1302_IO){
+            dat |= 1 << i;
+        }
+        DS1302_CL = 1;
+        DS1302_CL = 0;
+    }
+    
+    return dat;
+}
+
+void DS1302BurstRead(unsigned char leg){
+    unsigned char i;
+       
+    DS1302Start();
+    DS1302ByteWrite(0xBF);
+    for(i=0;i < leg;i++){
+        time[i] = DS1302ByteRead();
+    }
+    DS1302End();
+    
+//    return dat;
+}
+
+void DS1302BurstWrite(){
+    unsigned char i;
+       
+    DS1302Start();
+    DS1302ByteWrite(0xBE);
+    for(i=0;i < 8;i++){
+        DS1302ByteWrite(time[i]);
+    }
+    DS1302End();
+}
+
+unsigned char DS1302SingleRead(unsigned char addr){
+    unsigned char dat;
+    
+    DS1302Start();
+    DS1302ByteWrite(addr);
+    dat = DS1302ByteRead();
+    DS1302End();
+    
+    return dat;
+}

@@ -1,153 +1,37 @@
-#include "STC15F2K.H"
+#include "init.h"
+#include "ds3231.h"
 
-sbit DS3231_SDA = P32;
-sbit DS3231_SCL = P33;
+void UartInit();
+void SendData(u8 data_buf);
 
-
-//DS3231开始信号
-void IIC_Start(){
-    DS3231_SCL = 1;
-    DS3231_SDA = 1;
-    DelayIIC();
-    DS3231_SDA = 0;
-    DelayIIC();
-    DS3231_SCL = 0;
-}
-
-//DS3231停止信号
-void IIC_Stop(){
-    DS3231_SDA = 0;
-    DelayIIC();
-    DS3231_SCL = 1;
-    DelayIIC();
-    DS3231_SDA = 1;
-    DelayIIC();
-}
-
-//ds3231应答
-bit IIC_ACK(){
-    bit ack;
-    DS3231_SDA = 1;
-    DelayIIC();
-    DS3231_SCL = 1;
-    DelayIIC();
-    ack = DS3231_SDA;
-    DelayIIC();
-    DS3231_SCL = 0;
-    DelayIIC();
-    return ack;
-}
-
-//从IIC总线写一个字节
-void IIC_Write_Byte(unsigned char dat){
+void main(){
+    u8 str[] = "STC12MaWei";
     u8 i;
-    for(i=0;i<8;i++){
-        dat <<= 1;
-        DS3231_SDA = CY;
-        DelayIIC();
-        DS3231_SCL = 1;
-        DelayIIC();
-        DS3231_SCL = 0;
-        DelayIIC();
+    
+    EA = 1; 
+    UartInit();
+
+    while(1){
+        Read_RTC();
     }
 }
 
-//从IIC总线读一个字节
-unsigned char IIC_Read_Byte(){
-    unsigned char i;
-    unsigned char dat;
-    for(i=0;i<8;i++){
-        DS3231_SCL = 1;
-        DelayIIC();
-        if(DS3231_SDA)
-            dat |= 1 << i;
-        DS3231_SCL = 0;
-        DelayIIC();
-    }
-    return dat;
+//uart初始化
+void UartInit(void)		//4800bps@12.000MHz
+{
+	SCON = 0x50;		//8位数据,可变波特率
+	AUXR |= 0x01;		//串口1选择定时器2为波特率发生器
+	AUXR |= 0x04;		//定时器2时钟为Fosc,即1T
+	T2L = 0x8F;		//设定定时初值
+	T2H = 0xFD;		//设定定时初值
+	AUXR |= 0x10;		//启动定时器2
 }
 
-//写入一个字节到DS3231
-unsigned char DS3231_Write_Single_Byte(unsigned char addr,unsigned char dat){
-    //给IIC写入开始信号
-    IIC_Start();
-    //写入DS3231在总线上的设备地址
-    IIC_Write_Byte(0xD0);
-    //等待DS3231应答
-    IIC_ACK();
-    //写入DS3231操作地址
-    IIC_Write_Byte(addr);
-    //等待DS3231应答
-    IIC_ACK();
-    //给DS3231该地址位写入数据
-    IIC_Write_Byte(dat);
-    //等待DS3231应答
-    IIC_ACK();
-    //给IIC总线写入停止信号
-    IIC_Stop();
-}
-
-//读取DS3231一个字节
-unsigned char DS3231_Read_Single_Byte(unsigned char addr){
-    unsigned char dat;
-    //给IIC写入开始信号
-    IIC_Start();
-    //写入DS3231在总线上的设备地址
-    IIC_Write_Byte(0xD0);
-    //等待DS3231应答
-    IIC_ACK();
-    //写入DS3231操作地址
-    IIC_Write_Byte(addr);
-    //等待DS3231应答
-    IIC_ACK();
-    //给IIC总线写入停止信号
-    IIC_Stop();
-    //读取DS3231该地址上的值
-    //给IIC写入开始信号
-    IIC_Start();
-    //写入DS3231在总线上的设备地址
-    IIC_Write_Byte(0xD1);
-    //等待DS3231应答
-    IIC_ACK();
-    //读取DS3231该地址的值
-    dat = IIC_Read_Byte();
-    //给IIC总线写入停止信号
-    IIC_Stop();
-    return dat;
-}
-
-//16进制数转成BCD码
-unsigned char HEXToBCD(unsigned char val){
-    unsigned char i,j,k;
-
-    i = val/10;
-    j = val%10;
-    k = j+(i << 4);
-    return k;
-}
-
-//BCD转成16进制数
-unsigned char BCDToHEX(unsigned char val){
-    unsigned char i;
-    i = val&0x0F;
-    val >> = 4;
-    val &= 0x0F;
-    val *= 10;
-    i += val;
-    return i;
-}
-
-//IIC延时函数
-void DelayIIC(){
-    //IIC总线限速延时函数 Delay10us。
-    //该函数是空函数，延时4个机器周期。
-    //_nop_();_nop_();_nop_();_nop_();
-	unsigned char i;
-
-	_nop_();
-	_nop_();
-	i = 27;
-	while (--i);
+//发送一个字符
+void SendData(u8 data_buf){
+	SBUF = data_buf;
+	while(!TI);//TI是发送成功标志
+	TI = 0;
 }
 
 //延时1微秒
@@ -158,10 +42,8 @@ void Delay1us(){  //@12MHz
     _nop_();
 }
 
-
-void main(){
-
-    while(1){
-
+void DelayXus(u8 i){
+    while(i--){
+        Delay1us();
     }
 }

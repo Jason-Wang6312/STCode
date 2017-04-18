@@ -364,9 +364,9 @@
           <GroupName>Uart</GroupName>
           <Files>
             <File>
-              <FileName>main.c</FileName>
+              <FileName>Uart.C</FileName>
               <FileType>1</FileType>
-              <FilePath>.\main.c</FilePath>
+              <FilePath>.\Uart.C</FilePath>
             </File>
           </Files>
         </Group>

@@ -364,9 +364,9 @@
           <GroupName>main</GroupName>
           <Files>
             <File>
-              <FileName>main.c</FileName>
+              <FileName>test.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\main.c</FilePath>
+              <FilePath>.\test.c</FilePath>
             </File>
           </Files>
         </Group>
