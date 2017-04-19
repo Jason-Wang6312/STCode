@@ -1,14 +1,14 @@
-//#include "STC15Wxx.H"
-#include "STC12C5A.H"
+#include "STC15Wxx.H"
+//#include "STC12C5A.H"
 #include "INTRINS.H"
 
-//sbit DS1302_IO = P3^3;
-//sbit DS1302_CE = P5^5;
-//sbit DS1302_CL = P3^2;
+sbit DS1302_IO = P3^3;
+sbit DS1302_CE = P5^5;
+sbit DS1302_CL = P3^2;
 
-sbit DS1302_IO = P3^4;
-sbit DS1302_CE = P3^5;
-sbit DS1302_CL = P3^6;
+//sbit DS1302_IO = P3^4;
+//sbit DS1302_CE = P3^5;
+//sbit DS1302_CL = P3^6;
 //sbit WIFI = P3^2;
 
 void UartInit();
@@ -18,47 +18,59 @@ void DS1302BurstWrite();
 void DS1302BurstRead(unsigned char leg);
 unsigned char DS1302SingleRead(unsigned char addr);
 
-unsigned char time[7] = {0x00,0x00,0x19,0x15,0x04,0x06,0x17};
+unsigned char time[7] = {0x00,0x16,0x18,0x19,0x04,0x06,0x17};
 unsigned int sec;
 unsigned char second;
 bit busy;
 
+void Delay300ms()		//@12.000MHz
+{
+	unsigned char i, j, k;
+
+	i = 14;
+	j = 174;
+	k = 224;
+	do
+	{
+		do
+		{
+			while (--k);
+		} while (--j);
+	} while (--i);
+}
+
 void main(){
-    unsigned char i,str[5] = "mawei";
+//    unsigned char i,str[5] = "mawei";
     EA = 1;
     
     UartInit();
     Timer0Init();
-    //DS1302BurstWrite();
+    DS1302BurstWrite();
+    
+    Delay300ms();
+//    for(i=0;i<5;i++){
+//        sendData(str[i]);
+//    }
     
     while(1){
-        for(i=0;i<5;i++){
-            sendData(str[i]);
+        if(sec > 1000){
+            sec = 0;
+            DS1302BurstRead(3);
+            sendData(time[0]);
+            sendData(time[1]);
+            sendData(time[2]);
         }
     }
 }
 
-//void UartInit(void)		//4800bps@12.000MHz
-//{
-//	SCON = 0x50;		//8位数据,可变波特率
-//	AUXR |= 0x01;		//串口1选择定时器2为波特率发生器
-//	AUXR |= 0x04;		//定时器2时钟为Fosc,即1T
-//	T2L = 0x8F;		//设定定时初值
-//	T2H = 0xFD;		//设定定时初值
-//	AUXR |= 0x10;		//启动定时器2
-//}
-
 void UartInit(void)		//4800bps@12.000MHz
 {
-    PCON=0x80;
-	SCON = 0x52;
-	AUXR &= 0xFE;
-	TL1 = TH1 = 0xF3;
-	TMOD &= 0x0F;
-	TMOD = 0x20;
-	ET1 = 0;		//禁止定时器1中断
-	TR1 = 1;		//启动定时器1
-    ES = 1;
+	SCON = 0x50;		//8位数据,可变波特率
+	AUXR |= 0x01;		//串口1选择定时器2为波特率发生器
+	AUXR |= 0x04;		//定时器2时钟为Fosc,即1T
+	T2L = 0x8F;		//设定定时初值
+	T2H = 0xFD;		//设定定时初值
+	AUXR |= 0x10;		//启动定时器2
 }
 
 void Timer0Init(void)		//1毫秒@12.000MHz
@@ -73,20 +85,9 @@ void Timer0Init(void)		//1毫秒@12.000MHz
 }
 
 void sendData(unsigned char dat){
-	while(busy);
-	busy = 1;
     SBUF = dat;
-}
-
-
-void UartIT() interrupt 4 using 1{
-	if(RI){
-		RI = 0;
-	}
-	if(TI){
-        busy = 0;
-		TI = 0;
-	}
+    while(!TI);
+    TI = 0;
 }
 
 void T0() interrupt 1{
