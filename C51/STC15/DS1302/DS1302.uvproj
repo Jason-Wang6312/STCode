@@ -364,9 +364,14 @@
           <GroupName>main</GroupName>
           <Files>
             <File>
-              <FileName>alarm.c</FileName>
+              <FileName>main.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\alarm.c</FilePath>
+              <FilePath>.\main.c</FilePath>
+            </File>
+            <File>
+              <FileName>ds1302.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\ds1302.c</FilePath>
             </File>
           </Files>
         </Group>

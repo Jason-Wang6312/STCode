@@ -1,6 +1,6 @@
 #ifndef __INIT_
 #define __INIT_
-#include "STC12C5A.H"
+#include "STC15Wxx.H"
 #include "INTRINS.H"
 
 #define u8 unsigned char

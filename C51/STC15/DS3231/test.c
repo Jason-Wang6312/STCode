@@ -132,13 +132,12 @@ unsigned char IIC_Read_Byte(){
     unsigned char dat = 0x00;//定义一个存取变量。
     for(i=0;i<8;i++){
         DS3231_SCL = 1;//拉高时钟线，为读取下一位数据做准备。
-        dat <<= 1;//数据左移一位，把次高位放在最高位,为写入次高位做准备
         DelayIIC();
+        dat <<= 1;//数据左移一位，把次高位放在最高位,为写入次高位做准备
         if(DS3231_SDA)//如果为高就写入到数据，为零跳过
             dat |= 0x01;//数据是从高到低写入，所以右移或上。
         DS3231_SCL = 0;//拉低时钟线，为读取下一位数据做准备。
-        DelayIIC();
-        
+        DelayIIC();     
     }
     return dat;//返回读取的一个字节数据。
 }
@@ -178,8 +177,8 @@ unsigned char DS3231_Read_Single_Byte(unsigned char addr){
 //BCD转成16进制数
 unsigned char BCDToHEX(unsigned char val){
     unsigned char i;
-    i = val&0x0F;//取出高四位
-    val >>= 4;//取出低四位
+    i = val&0x0F;//取出低四位
+    val >>= 4;//取出高四位
     val &= 0x0F;//
     val *= 10;
     i += val;
@@ -203,7 +202,6 @@ void Read_RTC(void){
     for(i=0;i<9;i++){
         timedata[i] = DS3231_Read_Single_Byte(*p++);
         if(i == 4) timedata[i] &= 0x7F;
-        if(i < 7) timedata[i] = BCDToHEX(timedata[i]); 
     }
 
 }
@@ -221,7 +219,6 @@ void Set_RTC(void){
 
 void main(){
     u8 str[] = "STC12MaWei";
-    u8 i;
     u8 dat = 0x00;
     
     EA = 1; 
@@ -229,16 +226,20 @@ void main(){
 
     DS3231_SDA = 1;
     DS3231_SCL = 1;
+    
+    Delay300ms();
+    Delay300ms();
+    Delay300ms();
 
     while(1){
-       Read_RTC();
-       for(i=0;i<6;i++){
-           dat = timedata[i];
-           SendData(dat);
-       }
-       SendData(0x0A);
+        Read_RTC();
+        dat = timedata[0];
+        //dat = DS3231_Read_Single_Byte(0x00);
+
+        SendData(dat);
        
-       Delay300ms();
-       Delay300ms();
+        Delay300ms();
+        Delay300ms();
+        Delay300ms();
     }
 }
