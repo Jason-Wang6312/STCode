@@ -100,6 +100,7 @@ void T0() interrupt 1{
     sec++;
 }
 
+
 void DS1302Start(){
     DS1302_CE = 0;
     DS1302_CL = 0;
