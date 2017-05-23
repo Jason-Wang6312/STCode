@@ -362,28 +362,6 @@
       <Groups>
         <Group>
           <GroupName>main</GroupName>
-          <Files>
-            <File>
-              <FileName>mian.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\mian.c</FilePath>
-            </File>
-            <File>
-              <FileName>lcd1602.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\lcd1602.c</FilePath>
-            </File>
-            <File>
-              <FileName>ds1302.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\ds1302.c</FilePath>
-            </File>
-            <File>
-              <FileName>ds18b20.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\ds18b20.c</FilePath>
-            </File>
-          </Files>
         </Group>
       </Groups>
     </Target>

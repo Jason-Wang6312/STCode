@@ -274,7 +274,7 @@ void main(void)
 PSB = 0;
  LCD_init();  
  LCD_Setaddress(2,3);
- print("您在使用");   
+ print("mawei");   
  LCD_Putstring(3,3,a);
 // LCD_write_dat(0x35);  
  LCD_draw_clr();

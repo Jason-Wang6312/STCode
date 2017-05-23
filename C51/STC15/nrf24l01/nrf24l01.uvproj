@@ -7,18 +7,18 @@
 
   <Targets>
     <Target>
-      <TargetName>LCD12864</TargetName>
+      <TargetName>nrf24l01</TargetName>
       <ToolsetNumber>0x0</ToolsetNumber>
       <ToolsetName>MCS-51</ToolsetName>
       <TargetOption>
         <TargetCommonOption>
-          <Device>STC15F2K60S2</Device>
+          <Device>STC15W408AS</Device>
           <Vendor>STC</Vendor>
-          <Cpu>IRAM(0-0xFF) XRAM(0-0x6FF) IROM(0-0xEFF8) CLOCK(35000000) MODP2</Cpu>
+          <Cpu>IRAM(0-0xFF) XRAM(0-0xFF) IROM(0-0x1FF8) CLOCK(35000000) MODP2</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile>"LIB\STARTUP.A51" ("Standard 8051 Startup Code")</StartupFile>
           <FlashDriverDll></FlashDriverDll>
-          <DeviceId>62472</DeviceId>
+          <DeviceId>62744</DeviceId>
           <RegisterFile>STC15F2K60S2.H</RegisterFile>
           <MemoryEnv></MemoryEnv>
           <Cmp></Cmp>
@@ -45,7 +45,7 @@
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
           <OutputDirectory>.\Objects\</OutputDirectory>
-          <OutputName>LCD12864</OutputName>
+          <OutputName>nrf24l01</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>1</CreateHexFile>
@@ -270,7 +270,7 @@
               <IRO>
                 <Type>1</Type>
                 <StartAddress>0x0</StartAddress>
-                <Size>0xeff9</Size>
+                <Size>0x1ff9</Size>
               </IRO>
               <IRA>
                 <Type>0</Type>
@@ -280,7 +280,7 @@
               <XRA>
                 <Type>0</Type>
                 <StartAddress>0x0</StartAddress>
-                <Size>0x700</Size>
+                <Size>0x100</Size>
               </XRA>
               <XRA512>
                 <Type>0</Type>
@@ -361,12 +361,12 @@
       </TargetOption>
       <Groups>
         <Group>
-          <GroupName>LCD12864</GroupName>
+          <GroupName>main</GroupName>
           <Files>
             <File>
-              <FileName>12864.C</FileName>
+              <FileName>main2.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\12864.C</FilePath>
+              <FilePath>.\main2.c</FilePath>
             </File>
           </Files>
         </Group>

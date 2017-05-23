@@ -4,12 +4,14 @@
 
 sbit DS1302_IO = P3^3;
 sbit DS1302_CE = P5^5;
-sbit DS1302_CL = P3^2;
+sbit DS1302_CL = P5^4;
+sbit WIFI = P3^2;
+//sbit DS1302_CL = P3^2;
 
 //sbit DS1302_IO = P3^4;
 //sbit DS1302_CE = P3^5;
 //sbit DS1302_CL = P3^6;
-//sbit WIFI = P3^2;
+
 
 void UartInit();
 void Timer0Init();
@@ -18,7 +20,7 @@ void DS1302BurstWrite();
 void DS1302BurstRead(unsigned char leg);
 unsigned char DS1302SingleRead(unsigned char addr);
 
-unsigned char time[7] = {0x00,0x16,0x18,0x19,0x04,0x06,0x17};
+unsigned char time[7] = {0x50,0x15,0x20,0x23,0x04,0x06,0x17};
 unsigned int sec;
 unsigned char second;
 bit busy;
@@ -40,7 +42,7 @@ void Delay300ms()		//@12.000MHz
 }
 
 void main(){
-//    unsigned char i,str[5] = "mawei";
+    unsigned char i,k = 0x26;
     EA = 1;
     
     UartInit();
@@ -48,10 +50,8 @@ void main(){
     DS1302BurstWrite();
     
     Delay300ms();
-//    for(i=0;i<5;i++){
-//        sendData(str[i]);
-//    }
     
+    i = ((k > 0x25) && (k < 0x27));
     while(1){
         if(sec > 1000){
             sec = 0;
@@ -59,6 +59,12 @@ void main(){
             sendData(time[0]);
             sendData(time[1]);
             sendData(time[2]);
+            sendData(WIFI);
+            if((time[2] > 0x01) && (time[2] < 0x08)){
+                WIFI = 0;
+            }else{
+                WIFI = 1;
+            }
         }
     }
 }
@@ -145,8 +151,6 @@ void DS1302BurstRead(unsigned char leg){
         time[i] = DS1302ByteRead();
     }
     DS1302End();
-    
-//    return dat;
 }
 
 void DS1302BurstWrite(){
