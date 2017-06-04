@@ -150,7 +150,7 @@ void Read_RTC(void){
 //设置DS3231初始时间
 void Set_RTC(void){
     unsigned char i;
-    unsigned char initTime[7] = {0x00,0x20,0x23,0x23,0x05,0x17,0x05};
+    unsigned char initTime[7] = {0x00,0x28,0x14,0x04,0x06,0x17,0x06};
     for(i = 0; i < 7; i++){
         DS3231_Write_Single_Byte(RTC_addresss[i],initTime[i]);
     }

@@ -1,295 +1,84 @@
-C51 COMPILER V9.54   EEPROM                                                                08/23/2016 21:18:47 PAGE 1   
+C51 COMPILER V9.56.0.0   EEPROM                                                            06/03/2017 14:30:18 PAGE 1   
 
 
-C51 COMPILER V9.54, COMPILATION OF MODULE EEPROM
+C51 COMPILER V9.56.0.0, COMPILATION OF MODULE EEPROM
 OBJECT MODULE PLACED IN eeprom.OBJ
 COMPILER INVOKED BY: F:\Keil5\C51\BIN\C51.EXE eeprom.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND
 
 line level    source
 
-   1          /*---------------------------------------------------------------------*/
-   2          /* --- STC MCU Limited ------------------------------------------------*/
-   3          /* --- STC15F4K60S4 系列 内部EEPROM举例--------------------------------*/
-   4          /* --- Mobile: (86)13922805190 ----------------------------------------*/
-   5          /* --- Fax: 86-0513-55012956,55012947,55012969 ------------------------*/
-   6          /* --- Tel: 86-0513-55012928,55012929,55012966-------------------------*/
-   7          /* --- Web: www.STCMCU.com --------------------------------------------*/
-   8          /* --- Web: www.GXWMCU.com --------------------------------------------*/
-   9          /* 如果要在程序中使用此代码,请在程序中注明使用了STC的资料及程序        */
-  10          /* 如果要在文章中应用此代码,请在文章中注明使用了STC的资料及程序        */
-  11          /*---------------------------------------------------------------------*/
-  12          
-  13          //本示例在Keil开发环境下请选择Intel的8058芯片型号进行编译
-  14          //若无特别说明,工作频率一般为11.0592MHz
-  15          
-  16          
-  17          #include "reg51.h"
-  18          #include "intrins.h"
-  19          
-  20          typedef unsigned char BYTE;
-  21          typedef unsigned int WORD;
-  22          
-  23          //-----------------------------------------------
-  24          
-  25          sfr P1M1 = 0x91;    //PxM1.n,PxM0.n     =00--->Standard,    01--->push-pull
-  26          sfr P1M0 = 0x92;    //                  =10--->pure input,  11--->open drain
-  27          sfr P0M1 = 0x93;
-  28          sfr P0M0 = 0x94;
-  29          sfr P2M1 = 0x95;
-  30          sfr P2M0 = 0x96;
-  31          sfr P3M1 = 0xB1;
-  32          sfr P3M0 = 0xB2;
-  33          sfr P4M1 = 0xB3;
-  34          sfr P4M0 = 0xB4;
-  35          sfr P5M1 = 0xC9;
-  36          sfr P5M0 = 0xCA;
-  37          sfr P6M1 = 0xCB;
-  38          sfr P6M0 = 0xCC;
-  39          sfr P7M1 = 0xE1;
-  40          sfr P7M0 = 0xE2;
-  41          
-  42          sfr IAP_DATA    =   0xC2;           //IAP数据寄存器
-  43          sfr IAP_ADDRH   =   0xC3;           //IAP地址寄存器高字节
-  44          sfr IAP_ADDRL   =   0xC4;           //IAP地址寄存器低字节
-  45          sfr IAP_CMD     =   0xC5;           //IAP命令寄存器
-  46          sfr IAP_TRIG    =   0xC6;           //IAP命令触发寄存器
-  47          sfr IAP_CONTR   =   0xC7;           //IAP控制寄存器
-  48          
-  49          #define CMD_IDLE    0               //空闲模式
-  50          #define CMD_READ    1               //IAP字节读命令
-  51          #define CMD_PROGRAM 2               //IAP字节编程命令
-  52          #define CMD_ERASE   3               //IAP扇区擦除命令
-  53          
-  54          #define     URMD    0           //0:使用定时器2作为波特率发生器
-  55                                          //1:使用定时器1的模式0(16位自动重载模式)作为波特率发�
-C51 COMPILER V9.54   EEPROM                                                                08/23/2016 21:18:47 PAGE 2   
+   1          #include "eeprom.h"
+   2          
+   3          /*----------------------------
+   4          关闭IAP
+   5          ----------------------------*/
+   6          void EepromClose(){
+   7   1          IAP_CONTR = 0;                  //关闭IAP功能
+   8   1          IAP_CMD = 0;                    //清除命令寄存器
+   9   1          IAP_TRIG = 0;                   //清除触发寄存器
+  10   1          IAP_ADDRH = 0x80;               //将地址设置到非IAP区域
+  11   1          IAP_ADDRL = 0;
+  12   1      }
+  13          
+  14          /*----------------------------
+  15          从ISP/IAP/EEPROM区域读取一字节
+  16          ----------------------------*/
+  17          unsigned char EepromReadByte(unsigned int addr){
+  18   1          unsigned char dat;                       //数据缓冲区
+  19   1      
+  20   1          IAP_CONTR = ENABLE_IAP;         //使能IAP
+  21   1          IAP_CMD = CMD_READ;             //设置IAP命令
+  22   1          IAP_ADDRL = addr;               //设置IAP低地址
+  23   1          IAP_ADDRH = addr >> 8;          //设置IAP高地址
+  24   1          IAP_TRIG = 0x5a;                //写触发命令(0x5a)
+  25   1          IAP_TRIG = 0xa5;                //写触发命令(0xa5)
+  26   1          _nop_();                        //等待ISP/IAP/EEPROM操作完成
+  27   1          dat = IAP_DATA;                 //读ISP/IAP/EEPROM数据
+  28   1          EepromClose();
+  29   1          return dat;                     //返回
+  30   1      }
+  31          
+  32          /*----------------------------
+  33          写一字节数据到ISP/IAP/EEPROM区域
+  34          ----------------------------*/
+  35          void EepromWriteByte(unsigned int addr,unsigned char dat){
+  36   1          IAP_CONTR = ENABLE_IAP;         //使能IAP
+  37   1          IAP_CMD = CMD_PROGRAM;          //设置IAP命令
+  38   1          IAP_ADDRL = addr;               //设置IAP低地址
+  39   1          IAP_ADDRH = addr >> 8;          //设置IAP高地址
+  40   1          IAP_DATA = dat;                 //写ISP/IAP/EEPROM数据
+  41   1          IAP_TRIG = 0x5a;                //写触发命令(0x5a)
+  42   1          IAP_TRIG = 0xa5;                //写触发命令(0xa5)
+  43   1          _nop_();                        //等待ISP/IAP/EEPROM操作完成
+  44   1          EepromClose();
+  45   1      }
+  46          
+  47          /*----------------------------
+  48          扇区擦除
+  49          ----------------------------*/
+  50          void EepromEraseSector(unsigned int addr){
+  51   1          IAP_CONTR = ENABLE_IAP;         //使能IAP
+  52   1          IAP_CMD = CMD_ERASE;            //设置IAP命令
+  53   1          IAP_ADDRL = addr;               //设置IAP低地址
+  54   1          IAP_ADDRH = addr >> 8;          //设置IAP高地址
+  55   1          IAP_TRIG = 0x5a;                //写触发命令(0x5a)
+C51 COMPILER V9.56.0.0   EEPROM                                                            06/03/2017 14:30:18 PAGE 2   
 
-             -��器
-  56                                          //2:使用定时器1的模式2(8位自动重载模式)作为波特率发�
-             -�器
-  57          
-  58          sfr T2H   = 0xd6;               //定时器2高8位
-  59          sfr T2L   = 0xd7;               //定时器2低8位
-  60          
-  61          sfr  AUXR       =   0x8e;       //辅助寄存器                              
-  62          
-  63          //#define ENABLE_IAP 0x80           //if SYSCLK<30MHz
-  64          //#define ENABLE_IAP 0x81           //if SYSCLK<24MHz
-  65          #define ENABLE_IAP  0x82            //if SYSCLK<20MHz
-  66          //#define ENABLE_IAP 0x83           //if SYSCLK<12MHz
-  67          //#define ENABLE_IAP 0x84           //if SYSCLK<6MHz
-  68          //#define ENABLE_IAP 0x85           //if SYSCLK<3MHz
-  69          //#define ENABLE_IAP 0x86           //if SYSCLK<2MHz
-  70          //#define ENABLE_IAP 0x87           //if SYSCLK<1MHz
-  71          
-  72          //测试地址
-  73          //#define IAP_ADDRESS 0x0400
-  74          #define IAP_ADDRESS 0x0000
-  75          
-  76          void Delay(BYTE n);
-  77          void IapIdle();
-  78          BYTE IapReadByte(WORD addr);
-  79          void IapProgramByte(WORD addr, BYTE dat);
-  80          void IapEraseSector(WORD addr);
-  81          void InitUart();
-  82          BYTE SendData(BYTE dat);
-  83          void SendStr(BYTE *s);
-  84          
-  85          void main()
-  86          {
-  87   1          WORD i;
-  88   1          BYTE mw[] = "whos's name,my name is mawei!\r\n";
-  89   1      
-  90   1          P0M0 = 0x00;
-  91   1          P0M1 = 0x00;
-  92   1          P1M0 = 0x00;
-  93   1          P1M1 = 0x00;
-  94   1          P2M0 = 0x00;
-  95   1          P2M1 = 0x00;
-  96   1          P3M0 = 0x00;
-  97   1          P3M1 = 0x00;
-  98   1          P4M0 = 0x00;
-  99   1          P4M1 = 0x00;
- 100   1          P5M0 = 0x00;
- 101   1          P5M1 = 0x00;
- 102   1          P6M0 = 0x00;
- 103   1          P6M1 = 0x00;
- 104   1          P7M0 = 0x00;
- 105   1          P7M1 = 0x00;
- 106   1      
- 107   1          
- 108   1          
- 109   1          P1 = 0xfe;                      //1111,1110 系统OK
- 110   1          InitUart();                     //初始化串口
- 111   1          Delay(250);                      //延时
- 112   1          IapEraseSector(IAP_ADDRESS);
- 113   1          SendStr("MaWei\r\n");
- 114   1          for(i=0;i<mw.length;i++){
-*** ERROR C200 IN LINE 114 OF eeprom.c: left side of '.' requires struct/union
-C51 COMPILER V9.54   EEPROM                                                                08/23/2016 21:18:47 PAGE 3   
+  56   1          IAP_TRIG = 0xa5;                //写触发命令(0xa5)
+  57   1          _nop_();                        //等待ISP/IAP/EEPROM操作完成
+  58   1          EepromClose();
+  59   1      }
 
- 115   2              IapProgramByte(IAP_ADDRESS+i, (BYTE)mw[i]);
- 116   2              SendData(mw[i]);
- 117   2          }
- 118   1          SendStr("Write OK!\r\n");
- 119   1          while (1){
- 120   2              for(i=0;i<50;i++){
- 121   3                  SendData(IapReadByte(IAP_ADDRESS+i));
- 122   3              }
- 123   2              Delay(150);
- 124   2          };
- 125   1          
- 126   1          
- 127   1      //    IapEraseSector(IAP_ADDRESS);    //扇区擦除
- 128   1      //    SendStr("MaWei-aaa");
- 129   1      //    for (i=0; i<512; i++)           //检测是否擦除成功(全FF检测)
- 130   1      //    {
- 131   1      //        if (SendData(IapReadByte(IAP_ADDRESS+i)) != 0xff)
- 132   1      //            SendData(i);             //如果出错,则退出
- 133   1      //    }
- 134   1      //    SendStr("OK");
- 135   1      //    P1 = 0xfc;                      //1111,1100 擦除成功
- 136   1      //    Delay(10);                      //延时
- 137   1      //    for (i=0; i<512; i++)           //编程512字节
- 138   1      //    {
- 139   1      //        IapProgramByte(IAP_ADDRESS+i, (BYTE)i);
- 140   1      //    }
- 141   1      //    P1 = 0xf8;                      //1111,1000 编程完成
- 142   1      //    Delay(10);                      //延时
- 143   1      //    for (i=0; i<512; i++)           //校验512字节
- 144   1      //    {
- 145   1      //        if (SendData(IapReadByte(IAP_ADDRESS+i)) != (BYTE)i)
- 146   1      //            goto Error;             //如果校验错误,则退出
- 147   1      //    }
- 148   1      //    P1 = 0xf0;                      //1111,0000 测试完成
- 149   1      //    while (1);
- 150   1      //Error:
- 151   1      //    P1 &= 0x7f;                     //0xxx,xxxx IAP操作失败
- 152   1      //    SendStr("End");
- 153   1      //    while (1);
- 154   1      }
- 155          
- 156          /*----------------------------
- 157          软件延时
- 158          ----------------------------*/
- 159          void Delay(BYTE n)
- 160          {
- 161   1          WORD x;
- 162   1      
- 163   1          while (n--)
- 164   1          {
- 165   2              x = 0;
- 166   2              while (++x);
- 167   2          }
- 168   1      }
- 169          
- 170          /*----------------------------
- 171          关闭IAP
- 172          ----------------------------*/
- 173          void IapIdle()
- 174          {
- 175   1          IAP_CONTR = 0;                  //关闭IAP功能
- 176   1          IAP_CMD = 0;                    //清除命令寄存器
-C51 COMPILER V9.54   EEPROM                                                                08/23/2016 21:18:47 PAGE 4   
 
- 177   1          IAP_TRIG = 0;                   //清除触发寄存器
- 178   1          IAP_ADDRH = 0x80;               //将地址设置到非IAP区域
- 179   1          IAP_ADDRL = 0;
- 180   1      }
- 181          
- 182          /*----------------------------
- 183          从ISP/IAP/EEPROM区域读取一字节
- 184          ----------------------------*/
- 185          BYTE IapReadByte(WORD addr)
- 186          {
- 187   1          BYTE dat;                       //数据缓冲区
- 188   1      
- 189   1          IAP_CONTR = ENABLE_IAP;         //使能IAP
- 190   1          IAP_CMD = CMD_READ;             //设置IAP命令
- 191   1          IAP_ADDRL = addr;               //设置IAP低地址
- 192   1          IAP_ADDRH = addr >> 8;          //设置IAP高地址
- 193   1          IAP_TRIG = 0x5a;                //写触发命令(0x5a)
- 194   1          IAP_TRIG = 0xa5;                //写触发命令(0xa5)
- 195   1          _nop_();                        //等待ISP/IAP/EEPROM操作完成
- 196   1          dat = IAP_DATA;                 //读ISP/IAP/EEPROM数据
- 197   1          IapIdle();                      //关闭IAP功能
- 198   1      
- 199   1          return dat;                     //返回
- 200   1      }
- 201          
- 202          /*----------------------------
- 203          写一字节数据到ISP/IAP/EEPROM区域
- 204          ----------------------------*/
- 205          void IapProgramByte(WORD addr, BYTE dat)
- 206          {
- 207   1          IAP_CONTR = ENABLE_IAP;         //使能IAP
- 208   1          IAP_CMD = CMD_PROGRAM;          //设置IAP命令
- 209   1          IAP_ADDRL = addr;               //设置IAP低地址
- 210   1          IAP_ADDRH = addr >> 8;          //设置IAP高地址
- 211   1          IAP_DATA = dat;                 //写ISP/IAP/EEPROM数据
- 212   1          IAP_TRIG = 0x5a;                //写触发命令(0x5a)
- 213   1          IAP_TRIG = 0xa5;                //写触发命令(0xa5)
- 214   1          _nop_();                        //等待ISP/IAP/EEPROM操作完成
- 215   1          IapIdle();
- 216   1      }
- 217          
- 218          /*----------------------------
- 219          扇区擦除
- 220          ----------------------------*/
- 221          void IapEraseSector(WORD addr)
- 222          {
- 223   1          IAP_CONTR = ENABLE_IAP;         //使能IAP
- 224   1          IAP_CMD = CMD_ERASE;            //设置IAP命令
- 225   1          IAP_ADDRL = addr;               //设置IAP低地址
- 226   1          IAP_ADDRH = addr >> 8;          //设置IAP高地址
- 227   1          IAP_TRIG = 0x5a;                //写触发命令(0x5a)
- 228   1          IAP_TRIG = 0xa5;                //写触发命令(0xa5)
- 229   1          _nop_();                        //等待ISP/IAP/EEPROM操作完成
- 230   1          IapIdle();
- 231   1      }
- 232          
- 233          /*----------------------------
- 234          初始化串口
- 235          ----------------------------*/
- 236          void InitUart()
- 237          {
- 238   1          SCON = 0x5a;                //设置串口为8位可变波特率
-C51 COMPILER V9.54   EEPROM                                                                08/23/2016 21:18:47 PAGE 5   
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     78    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
 
- 239   1      #if URMD == 0
- 240   1          T2L = 0xd8;                 //设置波特率重装值
- 241   1          T2H = 0xff;                 //115200 bps(65536-18432000/4/115200)
- 242   1          AUXR = 0x14;                //T2为1T模式, 并启动定时器2
- 243   1          AUXR |= 0x01;               //选择定时器2为串口1的波特率发生器
- 244   1      #elif URMD == 1
-                  AUXR = 0x40;                //定时器1为1T模式
-                  TMOD = 0x00;                //定时器1为模式0(16位自动重载)
-                  TL1 = 0xd8;                 //设置波特率重装值
-                  TH1 = 0xff;                 //115200 bps(65536-18432000/4/115200)
-                  TR1 = 1;                    //定时器1开始启动
-              #else
-                  TMOD = 0x20;                //设置定时器1为8位自动重装载模式
-                  AUXR = 0x40;                //定时器1为1T模式
-                  TH1 = TL1 = 0xfb;           //115200 bps(256 - 18432000/32/115200)
-                  TR1 = 1;
-              #endif
- 256   1      }
- 257          
- 258          /*----------------------------
- 259          发送串口数据
- 260          ----------------------------*/
- 261          BYTE SendData(BYTE dat){
- 262   1          while (!TI);                    //等待前一个数据发送完成
- 263   1          TI = 0;                         //清除发送标志
- 264   1          SBUF = dat;                     //发送当前数据
- 265   1          
- 266   1          return dat;
- 267   1      }
- 268          
- 269          void SendStr(BYTE *s){
- 270   1          while(*s){
- 271   2              SendData(*s++);
- 272   2          }
- 273   1      }
 
-C51 COMPILATION COMPLETE.  0 WARNING(S),  1 ERROR(S)
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

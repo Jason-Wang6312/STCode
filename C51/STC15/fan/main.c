@@ -1,4 +1,5 @@
 #include "STC15Wxx.h"
+#include "eeprom.h"
 
 typedef unsigned char u8;
 typedef unsigned int u16;
@@ -36,6 +37,10 @@ void DelayXms(u16 n);//软件延时
 void keyDriver();//按键驱动
 void LedShow(u8 num);//LED显示
 void setFanTime();
+void initFanTime();
+void writeFanTime();
+void UartInit();
+void SendData(unsigned char data_buf);
  
 //全局变量声明
 
@@ -43,6 +48,8 @@ void setFanTime();
 u8 keySta[] = {1,1,1,1,1};//按键状态
 u8 keyIndex;//按键索引
 u8 keyFanStatus = 0;
+bit keyIsDown = 0;
+u16 keyDelayTime = 0;
 
 //红外线
 bit Irprot_LastState = 0;   // 端口状态位
@@ -51,8 +58,7 @@ u8 irTime;                   // 码时间，用于以125us时间计时
 u8 IR_data[4]={48,49,50,51}; // 接收数据缓存
 
 //风扇时间
-u8 code fanTimeBak[] = {5,10};
-u8 fanRun = 5;
+u8 fanRun = 6;
 u8 fanStop = 10;
 u8 fanTime = 0;
 bit fanStatus = 0;
@@ -63,7 +69,13 @@ u16 cnt = 0;
 void main(){
     EA = 1;
     
+    //初始化定时器2
     Timer2Init();
+//    UartInit();
+    //初始化风扇运、停时间
+    initFanTime();
+    DelayXms(500);
+    fanIO = 0;
     
     while(1){
         if(cnt > 1000){
@@ -71,17 +83,44 @@ void main(){
             fanTime--;
             LedShow(fanTime);
         }
-        if(fanTime == 0){
-            if(fanStatus)
+        if(fanTime <= 0){
+            if(fanStatus){
                 fanTime = fanRun;
-            else
+            }else{
                 fanTime = fanStop;
+            }
             fanStatus = ~fanStatus;
-            fanIO = fanStatus;
+            fanIO = ~fanIO;
         }
         setFanTime();
+        //
+        if(keyDelayTime > 5000){
+            keyDelayTime = 0;
+            keyIsDown = 0;
+            writeFanTime();
+        }
     }
 }
+
+//初始化风扇运、停时间
+void initFanTime(){
+    fanRun = EepromReadByte(0x0000);
+    fanStop = EepromReadByte(0x0001);
+    if(fanRun == 0xFF){
+        fanRun = 5;
+        fanStop = 10;
+        writeFanTime();
+        SendData(0xAA);
+    }
+}
+
+//风扇运、停时间并写入eeprom
+void writeFanTime(){
+    EepromEraseSector(0x0000);
+    EepromWriteByte(0x0000,fanRun);
+    EepromWriteByte(0x0001,fanStop);
+}
+
 //设置风扇运行、停止时间
 void setFanTime(){
     //按键驱动
@@ -89,37 +128,30 @@ void setFanTime(){
     switch(keyIndex){
         case 1:
             keyFanStatus = ~keyFanStatus;
-            P55 = keyFanStatus;
-            keyIndex = 0;
+            P55 = ~keyFanStatus;
             break;
         case 2:
             if(keyFanStatus)
                 fanRun++;
             else
                 fanStop++;
-            keyIndex = 0;
+            //按键按下延时把风扇运、停时间写入到eeprom
+            keyIsDown = 1;
+            keyDelayTime = 0;
             break;
         case 3:
             if(keyFanStatus)
                 fanRun--;
             else
                 fanStop--;
-            keyIndex = 0;
+            //按键按下延时把风扇运、停时间写入到eeprom
+            keyIsDown = 1;
+            keyDelayTime = 0;
             break;
-        default:
-//            fanRun = fanTimeBak[0];
-//            fanStop = fanTimeBak[1];
-            break; 
     }
-//    if(keyFanStatus)
-//        LedShow(fanRun);
-//    else
-//        LedShow(fanStop);
+    keyIndex = 0;//擦除按键
 }
 
-void checkInfrar(){
-    
-}
 
 //LED显示
 void LedShow(u8 num){
@@ -186,15 +218,15 @@ void Timer2Init(void)		//1毫秒@12.000MHz
 //    IE2 = 1; //开启定时器2中断
 }
 
-//void UartInit(void)        //4800bps@12.000MHz
-//{
-//    SCON = 0x50;        //8位数据,可变波特率
-//    AUXR |= 0x01;        //串口1选择定时器2为波特率发生器
-//    AUXR |= 0x04;        //定时器2时钟为Fosc,即1T
-//    T2L = 0x8F;        //设定定时初值
-//    T2H = 0xFD;        //设定定时初值
-//    AUXR |= 0x10;        //启动定时器2
-//}
+void UartInit(void)        //4800bps@12.000MHz
+{
+    SCON = 0x50;        //8位数据,可变波特率
+    AUXR |= 0x01;        //串口1选择定时器2为波特率发生器
+    AUXR |= 0x04;        //定时器2时钟为Fosc,即1T
+    T2L = 0x8F;        //设定定时初值
+    T2H = 0xFD;        //设定定时初值
+    AUXR |= 0x10;        //启动定时器2
+}
 
 //定时器0中断函数 125us
 void Timer0() interrupt 1
@@ -219,6 +251,26 @@ void Timer0() interrupt 1
 void Timer2() interrupt 12{
     keyScan();//按键扫描
     //LED显示
-    
     cnt++;
+    
+    if(keyIsDown) keyDelayTime++;
+}
+
+void DelayXms(unsigned int x){ //@12.000MHz
+    unsigned char i, j;
+    while(x--){
+        i = 12;
+        j = 169;
+        do
+        {
+            while (--j);
+        } while (--i);
+    }
+}
+
+void SendData(unsigned char data_buf) //发送一个字符
+{
+	SBUF = data_buf;
+	while(!TI);//TI是发送成功标志
+	TI = 0;
 }

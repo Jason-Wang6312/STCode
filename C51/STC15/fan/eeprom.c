@@ -25,7 +25,8 @@ unsigned char EepromReadByte(unsigned int addr){
     IAP_TRIG = 0xa5;                //写触发命令(0xa5)
     _nop_();                        //等待ISP/IAP/EEPROM操作完成
     dat = IAP_DATA;                 //读ISP/IAP/EEPROM数据
-    EepromClose();
+    EepromClose();                      //关闭IAP功能
+
     return dat;                     //返回
 }
 
@@ -42,6 +43,7 @@ void EepromWriteByte(unsigned int addr,unsigned char dat){
     IAP_TRIG = 0xa5;                //写触发命令(0xa5)
     _nop_();                        //等待ISP/IAP/EEPROM操作完成
     EepromClose();
+
 }
 
 /*----------------------------

@@ -18,7 +18,7 @@
 //   ---LED1--LED2--LED3--LED4---
 //                 
 //   E-----D----H----C-----G----L4
-//共阴极数码管的0 1 2 3 4 5 6 7 8 9 A b C d E F
+//共阳极数码管的0 1 2 3 4 5 6 7 8 9 A b C d E F
 u8 code Dig[17]={0xc0,0xf9,0xa4,0xb0,0x99,0x92,0x82,0xf8,0x80,0x90,0x88,0x83,0xc6,0xa1,0x86,0x8e};
 //u8 code Dig[17]={0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x07,0x7F, 0x6F, 0x77, 0x7C, 0x39, 0x5E, 0x79, 0x71,0x00};
 
@@ -27,8 +27,8 @@ sbit L1 = P3^4; //数码管第一位共阴脚
 sbit L2 = P3^5; //数码管第二位共阴脚
 sbit L3 = P3^6; //数码管第三位共阴脚
 sbit L4 = P3^7; //数码管第四位共阴脚
-sbit LS = P5^4;
-#define LD  P2
+sbit LS = P5^4; //数码管秒钟脚
+#define LD  P2 //数码管显示数字
 //无线路由控制IO
 sbit wirelessRoute = P1^2;
                   
@@ -39,7 +39,7 @@ u8 showIndex;
 u8 LedNum = 3; //当前显示数码管序号
 u8 TempVal[4] = {1,2,3,4};
 u8 flashsec = 15;
-u8 flashIndex = 1;
+u8 flashIndex = 5;
 u8 dp = 0;
 
 //红外定义
@@ -61,7 +61,7 @@ typedef struct{
  
 //声明函数
 void Timer0Init(void);//定时器0寄存器初始化
-void Timer2Init();//定时器2初始化
+//void Timer2Init();//定时器2初始化
 void showNum(u8 dat,u8 num);//显示数据
 void UartInit(void);//串口初始化
 void SendData(u8 data_buf);//发送字符
@@ -81,30 +81,48 @@ void main(){
      
     //初始化定时器0
     Timer0Init();
-    Timer2Init();
+//    UartInit();
     //初始化串口
     delayXms(1000);        
-    Set_RTC();
+//    Set_RTC();
     delayXms(1000);
+    wirelessRoute = 0;
      
     while(1){
-        if(changcode > 5000){
-            changcode = 0;    
-            showIndex++;
-            if(showIndex > 1) showIndex = 0;
-        }
-        if(second > 998){
-            second = 0;
+        if(cnt > 1000){
+            cnt = 0;
             if(showIndex == 0){
                 LS = ~LS;
             }else{
                 LS = 1;
             }
-        }
-        if(readInterval > 300){
-            readInterval = 0;
             nowLedCode(showIndex);
         }
+        
+        if(readInterval > 5000){
+            readInterval = 0;
+            showIndex++;
+            showIndex &= 0x01;
+        }
+        
+        
+    }
+}
+
+//定时器0中断函数
+void T0INT() interrupt 1{
+    cnt++;
+    changcode++;
+    readInterval++;
+    
+    //数码管显示切换
+    if(changcode > 3){
+        changcode = 0;
+        //数码管显示
+        showNum(Dig[TempVal[LedNum]],LedNum);
+        //数码管显示索引
+        LedNum++;
+        LedNum &= 0x03;
     }
 }
 
@@ -183,85 +201,33 @@ void showNum(u8 dat,u8 num){
     }
 }
 
-//定时器0中断函数 125us
-void Timer0() interrupt 1
-{
-   irTime++; //计时增加125us         	
-   if(irTime==240) {irTime--;codeCnt=0x3f;} // ir解码后码值存放时间， 240*125us = 30ms  0x3f=64
-   if(IR_IO)   Irprot_LastState=1; // 记录IO状态
-   else if(Irprot_LastState)       // 有下降沿，并且上个状态是高电平，表示红外管收到数据
-   {
-      Irprot_LastState = 0;        // 下降沿后IO状态记录为0
-      if(irTime<24) // 小于24*125us=3ms的间隔才进行处理	因为红外线的0的周期1.125ms，1的周期2.25ms
-      {
-         codeCnt++; //数据码位计数+1
-		 codeCnt &= 0x1f; //等效if(codeCnt>0x1f) codeCnt=0x00; 这种操作比if判断更节约时间 0x1f=31
-         IR_data[codeCnt>>3] <<= 1; //codeCnt>>3的范围(0~3)，等效于IR_data[i]向左移动1位 (i范围0~3)
-         if( irTime>15 )  IR_data[codeCnt>>3]++;  //大于15*125us=1.875ms的间隔为数据1 ，1就+1，0就不变。
-      }
-      irTime = 0;                  // 下降沿处理完成，将时间清0
-	  if(codeCnt==31) TR0=0,EX0=1;//解码完成后，掉定时器0，顺便打开中断0
-   }	
-}
-
-//定时器0初始化
-void Timer0Init(void)		//125微秒@12.000MHz
+//定时器1初始化
+void Timer0Init(void)		//1毫秒@12.000MHz
 {
 	AUXR |= 0x80;		//定时器时钟1T模式
 	TMOD &= 0xF0;		//设置定时器模式
-	TL0 = 0x24;		//设置定时初值
-	TH0 = 0xFA;		//设置定时初值
+	TL0 = 0x20;		//设置定时初值
+	TH0 = 0xD1;		//设置定时初值
 	TF0 = 0;		//清除TF0标志
 	TR0 = 1;		//定时器0开始计时
-    ET0=1;			//打开定时器0中断
+    ET0 = 1;        //开启定时器0中断
 }
 
 //定时器2初始化
-void Timer2Init()		//1毫秒@12.000MHz
-{
-	AUXR |= 0x04;		//定时器时钟1T模式
-	T2L = 0x20;		//设置定时初值
-	T2H = 0xD1;		//设置定时初值
-	AUXR |= 0x10;		//定时器2开始计时
-    IE2 |= 0x04; //开始定时器2中断
-}
-//外部中断0初始化
-void INT0Init(void)//多了一个中断0
-{
-	IT0 = 0;	//INT0中断类型：1仅下降沿中断 0上下都中断
-	EX0 = 1;	// 使能INT0中断
-}
 
-//定时器0外部中断
-void INT0_ISR() interrupt 0
+void UartInit(void)		//4800bps@12.000MHz
 {
-	irTime=239;//给irTime赋予初始值，定时器0无法持续中断了，所以这里赋予默认值
-	EX0=0; // INT0 暂时关闭
-	TR0=1; //定时器0只有检测到有红外数据，才开始进行解码。
+	SCON = 0x50;		//8位数据,可变波特率
+	AUXR |= 0x01;		//串口1选择定时器2为波特率发生器
+	AUXR |= 0x04;		//定时器2时钟为Fosc,即1T
+	T2L = 0x8F;		//设定定时初值
+	T2H = 0xFD;		//设定定时初值
+	AUXR |= 0x10;		//启动定时器2
 }
 
 //定时器2中断
-void T2() interrupt 12{
-    second ++;
-    changcode++;
-    readInterval++;
-    cnt ++;
-     
-    if(cnt > 3){ //显示时间，如果这个设置大了，就出现闪烁，太小了也不
-        cnt = 0;
-        
-//        if(flashIndex == LedNum){
-//            flashsec = 0;
-//            showNum(0xFF,5);
-//        }else{
-//            showNum(Dig[TempVal[LedNum]],LedNum);//显示字符，先选择显示的位，然后转换成LED显示数码位
-//        }
-        showNum(Dig[TempVal[LedNum]],LedNum);//显示字符，先选择显示的位，然后转换成LED显示数码位
-        LedNum ++ ; //显示那位数码管
-        LedNum &= 0x03;//位操作，相当于0-3;
-        flashsec++;
-    }
-}
+
+
 
 //发送一个字符
 void SendData(u8 data_buf){

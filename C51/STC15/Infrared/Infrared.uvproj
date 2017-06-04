@@ -364,14 +364,9 @@
           <GroupName>Infrared</GroupName>
           <Files>
             <File>
-              <FileName>STARTUP.A51</FileName>
-              <FileType>2</FileType>
-              <FilePath>.\STARTUP.A51</FilePath>
-            </File>
-            <File>
-              <FileName>main.c</FileName>
+              <FileName>infrared.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\main.c</FilePath>
+              <FilePath>.\infrared.c</FilePath>
             </File>
           </Files>
         </Group>
