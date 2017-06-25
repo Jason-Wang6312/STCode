@@ -30,7 +30,7 @@ sbit L4 = P3^7; //数码管第四位共阴脚
 sbit LS = P5^4; //数码管秒钟脚
 #define LD  P2 //数码管显示数字
 //无线路由控制IO
-sbit wirelessRoute = P1^2;
+sbit wirelessRoute = P1^4;
                   
 //变量定义
 u16 cnt,changcode,second,num,temp; //时间
@@ -86,7 +86,7 @@ void main(){
     delayXms(1000);        
 //    Set_RTC();
     delayXms(1000);
-    wirelessRoute = 0;
+    wirelessRoute = 1;
      
     while(1){
         if(cnt > 1000){
@@ -103,9 +103,9 @@ void main(){
             readInterval = 0;
             showIndex++;
             showIndex &= 0x01;
+//            wirelessRoute = ~wirelessRoute;
         }
-        
-        
+          
     }
 }
 
@@ -138,9 +138,9 @@ void nowLedCode(u8 type){
             TempVal[2] = miute >> 4;
             TempVal[3] = miute&0x0F;
             if((hour > 0) && (hour < 7)){
-                wirelessRoute = 1;
-            }else
                 wirelessRoute = 0;
+            }else
+                wirelessRoute = 1;
             break;
         case 1: //显示温度
             temp = getTemp();
