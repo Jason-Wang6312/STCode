@@ -6,7 +6,7 @@ sbit DHT11IO = P0^5;
 typedef unsigned char u8;
 typedef unsigned int u16;
 
-u8 DumidTemp[] = {0x00,0x00,0x00,0x00,0x00};
+u8 DumidTemp[5];
 u16 sec;
 
 void UartInit();
@@ -33,7 +33,7 @@ void main(){
             sendData(DumidTemp[3]);
             sendData(DumidTemp[4]);
             for(i = 0;i<5;i++){
-                DumidTemp[i] = 0;
+                DumidTemp[i] = 0x00;
             }
         }
     }
@@ -106,7 +106,7 @@ bit DHT11Start(){
     DHT11IO = 0;
     DelayXms(20); //T1 (>18ms)
     DHT11IO = 1;
-    DelayX10us(3);
+    DelayX10us(2);
     
     while(DHT11IO && (x10us < 10)){ //T2 (40~50us) 等等T2拉低
         DelayX10us(1);
@@ -136,9 +136,10 @@ bit DHT11ReadData(){
                 x10us++;
                 DelayX10us(1);
             }
-            DelayX10us(4);
-            DumidTemp[i] <<= 1;
+            DelayX10us(4);      
+//            DumidTemp[i] <<= 1;            
             if(DHT11IO)  DumidTemp[i] |= 1;
+            DumidTemp[i] <<= 1;
         }
     }
     DHT11IO = 1;
