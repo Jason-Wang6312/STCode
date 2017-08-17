@@ -16,3 +16,4 @@ STM32/*/DebugConfig
 STM32/*.txt
 *Object*
 *Listing*
+*dbgconf

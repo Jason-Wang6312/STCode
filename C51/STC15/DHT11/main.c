@@ -6,7 +6,7 @@ sbit DHT11IO = P0^5;
 typedef unsigned char u8;
 typedef unsigned int u16;
 
-u8 DumidTemp[] = {0x00,0x00,0x00,0x00,0x00};
+u8 DumidTemp[5];
 u16 sec;
 
 void UartInit();
@@ -33,7 +33,7 @@ void main(){
             sendData(DumidTemp[3]);
             sendData(DumidTemp[4]);
             for(i = 0;i<5;i++){
-                DumidTemp[i] = 0;
+                DumidTemp[i] = 0x00;
             }
         }
     }
