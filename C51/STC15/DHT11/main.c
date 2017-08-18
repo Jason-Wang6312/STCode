@@ -75,14 +75,13 @@ void T0() interrupt 1{
 }
 
 
-void DelayX10us(unsigned int x)		//@12.000MHz
+void DelayXus(unsigned int x)		//@12.000MHz
 {
-	unsigned char i;
     while(x--){
         _nop_();
         _nop_();
-        i = 27;
-        while (--i);
+        _nop_();
+        _nop_();
     }
 }
 
@@ -101,43 +100,42 @@ void DelayXms(unsigned int x)		//@12.000MHz
 }
 
 bit DHT11Start(){
-    unsigned char x10us;
+    unsigned char xus;
     
     DHT11IO = 0;
     DelayXms(20); //T1 (>18ms)
     DHT11IO = 1;
-    DelayX10us(2);
+    DelayXus(30);
     
-    while(DHT11IO && (x10us < 10)){ //T2 (40~50us) 等等T2拉低
-        DelayX10us(1);
-        x10us++;
+    while(DHT11IO && (xus < 100)){ //T2 (40~50us) 等等T2拉低
+        DelayXus(1);
+        xus++;
     }
-    if(x10us > 9) return 0;
-    x10us = 0;
-    while(!DHT11IO && x10us < 10){ //T3 (40~50us) 等等T3拉高
-        DelayX10us(1);
-        x10us++;
+    if(xus > 100) return 0;
+    xus = 0;
+    while(!DHT11IO && xus < 100){ //T3 (40~50us) 等等T3拉高
+        DelayXus(1);
+        xus++;
     }
-    if(x10us > 9) return 0;
+    if(xus > 100) return 0;
     return 1;
 }
 
 bit DHT11ReadData(){
-    unsigned char i,j,x10us;
+    unsigned char i,j,xus;
     
     for(i=0;i<5;i++){
         for(j=0;j<8;j++){
-            while(DHT11IO && x10us < 10){
-                x10us++;
-                DelayX10us(1);
+            while(DHT11IO && xus < 100){              
+                DelayXus(1);
+                xus++;
             }
-            x10us = 0;
-            while(!DHT11IO && x10us < 10){
-                x10us++;
-                DelayX10us(1);
+            xus = 0;
+            while(!DHT11IO && xus < 100){
+                DelayXus(1);
+                xus++;
             }
-            DelayX10us(4);      
-//            DumidTemp[i] <<= 1;            
+            DelayXus(45);           
             if(DHT11IO)  DumidTemp[i] |= 1;
             DumidTemp[i] <<= 1;
         }
