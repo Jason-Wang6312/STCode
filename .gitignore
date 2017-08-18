@@ -17,3 +17,4 @@ STM32/*.txt
 *Object*
 *Listing*
 *dbgconf
+*.scvd

@@ -2,13 +2,6 @@
 #include "led.h"
 #include "delay.h"
 
- void Delay(u32 count)
- {
-  u32 i=0;
-  for(;i<count;i++);
-
- }
-
 int main(){
     
     //延时函数初始化
