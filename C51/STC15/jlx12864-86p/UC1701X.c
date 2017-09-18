@@ -26,8 +26,6 @@ void SPI_WriteCmd(unsigned char cmd){
         SPI_SDA = CY; //写入命令当前位状态
         SPI_SCLK = 1; //拉高时钟线让UC1702读取数据    
     }
-    SPI_RS = 1;
-    SPI_CS = 1;
 }
 
 //SPI写数据到LCD12864
@@ -41,14 +39,12 @@ void SPI_WriteData(unsigned char dat){
         dat <<= 1; 
         SPI_SDA = CY; //写入数据当前位状态
         SPI_SCLK = 1; //拉高时钟线让UC1702读取数据        
-    }
-    SPI_RS = 0;
-    SPI_CS = 1;//拉高片选
-    
+    }  
 }
 
 //设置LCD地址
 void location(unsigned char page,unsigned char col){
+    SPI_CS = 0;//拉低片选
     SPI_WriteCmd((0xB0 + page)); //每8行为一页，总共64行，共八页，从0页到7页，范围：0xB0~0xB7。
     SPI_WriteCmd((0x10+((col >> 4)&0x0F))); //列高位
     SPI_WriteCmd(col&0x0F); //列低位

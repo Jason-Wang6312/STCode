@@ -8,11 +8,11 @@
 /******** define pin **********/
 
 
-sbit SPI_SCLK = P4^4;
-sbit SPI_SDA  = P4^5;
-sbit SPI_RS   = P4^6;
-sbit SPI_REST = P0^7;
-sbit SPI_CS   = P0^6;
+sbit SPI_SCLK = P1^1;
+sbit SPI_SDA  = P1^0;
+sbit SPI_RS   = P0^7;
+sbit SPI_REST = P0^6;
+sbit SPI_CS   = P0^5;
 sbit LEDA     = P2^5;
 
 /*********函数声明**********/

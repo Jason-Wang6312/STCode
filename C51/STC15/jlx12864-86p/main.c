@@ -26,11 +26,11 @@ void main(){
     //初始化   
     initial_LCD();//uc1701x 显示屏初始化
  
-    //displayStr_5x7(0,0,"JKLMNOPQRSTUVWXYZ[\]^");
+    displayStr_5x7(0,0,"JKLMNOPQRSTUVWXYZ[\]^");
     DelayXms(600);
-    displayStr_5x7(0,0,"displayStr_5x7");
+//    displayStr_5x7(0,0,"displayStr_5x7");
     DelayXms(600);
-    displayStr_5x7(1,0,"displayStr_8x16");
+    displayStr_5x7(1,1,"displayStr_8x16");
     DelayXms(600);
     displayStr_8x16(4,0,"displayStr_5x7[\]^");
     DelayXms(600);
