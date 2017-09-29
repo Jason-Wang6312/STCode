@@ -13,6 +13,12 @@
 #define SLK_H   GPIO_SetBits(GPIOB,GPIO_Pin_7);
 #define SLK_L   GPIO_ResetBits(GPIOB,GPIO_Pin_7);
 
+u8 num9[]={
+/*-- 文字: 9 --*/
+/*-- 宋体 12; 此字体下对应的点阵为：宽 x 高=8x16 --*/
+0x00,0xE0,0x10,0x08,0x08,0x10,0xE0,0x00,0x00,0x00,0x31,0x22,0x22,0x11,0x0F,0x00
+};
+
 //写入命令
 void JLXCmdByte(u8 cmd){
     u8 i = 0;
@@ -26,10 +32,9 @@ void JLXCmdByte(u8 cmd){
         }else{
             SDA_L;
         }
-        delay_us(2);
         SLK_H;
-        delay_us(2);
-        cmd <<= 1;
+        delay_us(5);
+        cmd = cmd <<1;
     }  
 }
 
@@ -46,10 +51,9 @@ void JLXWriteByte(u8 dat){
         }else{
             SDA_L;
         }
-        delay_us(2);
         SLK_H;
-        delay_us(2);
-        dat <<= 1;
+        delay_us(5);
+        dat = dat << 1;
     }
 }
 
@@ -60,7 +64,6 @@ void JLXWriteAddr(u8 page,u8 column){
     JLXCmdByte((0xB0+page)); //写入页码,每8行为一页，总共64行，共八页，从0页到7页，范围：0xB0~0xB7。
     JLXCmdByte(((column >> 4)&0x0F)+0x10); //写入列地址高4位
     JLXCmdByte(column&0x0F); //写入列地址低4位
-
 }
 
 void JLXClearScreen(){
@@ -73,7 +76,6 @@ void JLXClearScreen(){
             JLXWriteByte(0x00);
         }
     }
-    CS_H;
 }
 
 void displayStr(u8 page,u8 col,u8 *str){
@@ -94,10 +96,24 @@ void displayStr(u8 page,u8 col,u8 *str){
     }
 }
 
-
-//晶联讯初始设置
-void JLX1353PNInit(){
+void display_graphic_8x16(u8 page,u8 column,u8 *dp)
+{
+    u8 i,j;
     
+    CS_L; 
+    for(j=0;j<2;j++)
+    {
+        JLXWriteAddr(page+j,column);
+        for (i=0;i<8;i++)
+        { 
+            JLXWriteByte(*dp);  /*写数据到 LCD,每写完一个 8 位的数据后列地址自动加 1*/
+            dp++;
+        }
+    }
+    CS_H;
+}
+
+void GPIOInit(){
     //GPIOB初始化结构体声明
     GPIO_InitTypeDef GPIO_InitStruct;
     
@@ -110,7 +126,10 @@ void JLX1353PNInit(){
     GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOB,&GPIO_InitStruct);
 //    GPIO_Write(GPIOB,0XFFFF);
-    
+}
+
+//晶联讯初始设置
+void JLX1353PNInit(){
     //JLX初始化设置
     CS_L;
     RST_L;
@@ -144,12 +163,23 @@ void JLX1353PNInit(){
 int main(){
     delay_init();
     
-    JLX1353PNInit();
-    
+    GPIOInit();
     delay_ms(1000);
     
-    displayStr(0,0,"display");
+    JLX1353PNInit();   
+    delay_ms(1000);
     
-    while(1);
+    JLXClearScreen();
+    delay_ms(1000);
+//    displayStr(0,0,"display");
+    
+    display_graphic_8x16(2,1,num9);
+    
+    while(1){
+        GPIO_SetBits(GPIOB,GPIO_Pin_2);
+        delay_ms(500);
+        GPIO_ResetBits(GPIOB,GPIO_Pin_2);
+        delay_ms(500);
+    };
 }
 
